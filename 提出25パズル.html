@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>25 パズル</title>
+
+  <style>
+    .container {
+      width: 450px;
+      height: 450px;
+      border: 1px solid red;
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    .item {
+      width: 90px;
+      height: 90px;
+      line-height: 90px;
+      border: 1px solid blue;
+      box-sizing: border-box;
+      background-color: aliceblue;
+      text-align: center;
+      vertical-align: middle;
+    }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+
+<body>
+  <div id="app">
+    <div class="container">
+      <div class="item" v-for="piece in pieces" v-on:click="move(piece)">
+        {{ piece === '' ? ' ' : piece }}
+      </div>
+    </div>
+    <button v-on:click="shufflePieces">シャッフルする</button>
+    <p>移動回数: {{ moveCountText }}</p>
+  </div>
+
+  <script>
+    Vue.createApp({
+      data() {
+        return {
+          pieces: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, ''],
+          moveCount: 0,
+        };
+      },
+
+      computed: {
+        moveCountText() {
+          return this.moveCount.toString();
+        },
+      },
+
+      methods: {
+        shufflePieces() {
+          this.pieces = _.shuffle(this.pieces);
+          this.moveCount = 0;
+        },
+
+        move(piece) {
+          const adjacentPieces = this.findAdjacentOfEmpty();
+
+          if (adjacentPieces.includes(piece)) {
+            const indexOfEmpty = this.pieces.findIndex((x) => x === '');
+            const indexOfPiece = this.pieces.findIndex((x) => x === piece);
+
+            [this.pieces[indexOfEmpty], this.pieces[indexOfPiece]] = [
+              this.pieces[indexOfPiece],
+              this.pieces[indexOfEmpty],
+            ];
+
+            this.moveCount++;
+          }
+
+          if (
+            _.isEqual(this.pieces.slice(0, 24), _.range(1, 25)) &&
+            this.pieces[24] === ''
+          ) {
+            setTimeout(() => alert("クリア！移動回数: " + this.moveCount), 0);
+          }
+        },
+
+        findAdjacentOfEmpty() {
+          const indexOfEmpty = this.pieces.findIndex((x) => x === '');
+
+          const movableIndex = [
+            indexOfEmpty - 5,
+            indexOfEmpty + 5,
+            indexOfEmpty - 1,
+            indexOfEmpty + 1,
+          ].filter((x) => x >= 0 && x <= 24);
+
+          return movableIndex.map((index) => this.pieces[index]);
+        },
+      },
+    }).mount("#app");
+  </script>
+</body>
+
+</html>
